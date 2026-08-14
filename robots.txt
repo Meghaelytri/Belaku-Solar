@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://belakusolar.in/sitemap.xml
