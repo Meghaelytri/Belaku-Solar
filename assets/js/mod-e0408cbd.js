@@ -119,9 +119,18 @@
       var f=st.dataset.field, min=+st.dataset.min, max=+st.dataset.max, stp=+st.dataset.step||1;
       var pre=st.dataset.prefix||'', suf=st.dataset.suffix||'';
       var out=st.querySelector('b'), minus=st.querySelector('[data-d="-1"]'), plus=st.querySelector('[data-d="1"]');
+      var label=(suf||f).trim();
+      minus.setAttribute('aria-label','Decrease '+label);
+      plus.setAttribute('aria-label','Increase '+label);
+      out.setAttribute('role','spinbutton');
+      out.setAttribute('aria-label',label);
+      out.setAttribute('aria-valuemin',min);
+      out.setAttribute('aria-valuemax',max);
       function paint(){
         var n=state[f];
         out.innerHTML=pre+n.toLocaleString('en-IN')+(suf?'<small>'+suf+'</small>':'');
+        out.setAttribute('aria-valuenow',n);
+        out.setAttribute('aria-valuetext',pre+n.toLocaleString('en-IN')+suf);
         minus.disabled=n<=min; plus.disabled=n>=max;
       }
       st.addEventListener('click',function(ev){
@@ -153,12 +162,25 @@
 
   document.querySelectorAll('[data-tabs]').forEach(function(box){
     var tabs=box.querySelectorAll('.calc__tabs button');
-    tabs.forEach(function(t){
-      t.addEventListener('click',function(){
-        tabs.forEach(function(x){x.setAttribute('aria-selected','false')});
-        t.setAttribute('aria-selected','true');
-        box.querySelectorAll('[data-calc]').forEach(function(p){p.hidden=p.dataset.calc!==t.dataset.tab});
+    function select(t){
+      tabs.forEach(function(x){x.setAttribute('aria-selected','false');x.tabIndex=-1});
+      t.setAttribute('aria-selected','true');t.tabIndex=0;t.focus();
+      box.querySelectorAll('[data-calc]').forEach(function(p){p.hidden=p.dataset.calc!==t.dataset.tab});
+    }
+    tabs.forEach(function(t,i){
+      t.tabIndex = t.getAttribute('aria-selected')==='true' ? 0 : -1;
+      t.addEventListener('keydown',function(e){
+        var n=tabs.length, dir=0;
+        if(e.key==='ArrowRight') dir=1; else if(e.key==='ArrowLeft') dir=-1;
+        else if(e.key==='Home'){select(tabs[0]);e.preventDefault();return;}
+        else if(e.key==='End'){select(tabs[n-1]);e.preventDefault();return;}
+        else return;
+        e.preventDefault();
+        select(tabs[(i+dir+n)%n]);
       });
+    });
+    tabs.forEach(function(t){
+      t.addEventListener('click',function(){ select(t); });
     });
   });
 })();

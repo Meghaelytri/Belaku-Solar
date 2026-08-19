@@ -1,4 +1,6 @@
+# TEMP pre-launch: this disallow is here because belakusolar.in is not DNS-live yet.
+# Remove the Disallow line (and restore "Allow: /") once the domain has cut over.
 User-agent: *
-Allow: /
+Disallow: /
 
 Sitemap: https://belakusolar.in/sitemap.xml
